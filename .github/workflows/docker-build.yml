@@ -29,17 +29,17 @@ jobs:
         push: true
         tags: aryankaushal7/wisecow:latest
 
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
+    
+    - name: Create Kind cluster
+      uses: helm/kind-action@v1.9.0
       with:
-        version: 'latest'
+        cluster_name: wisecow-cluster
 
-    - name: Configure kubeconfig
-      run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+    - name: Verify cluster
+      run: kubectl cluster-info
 
-    - name: Deploy to Kubernetes
+    - name: Deploy Wisecow manifests
       run: |
-        kubectl set image deployment/wisecow wisecow=aryankaushal7/wisecow:latest
+        kubectl apply -f wisecow-deployment.yaml
+        kubectl apply -f wisecow-service.yaml
         kubectl rollout status deployment/wisecow
