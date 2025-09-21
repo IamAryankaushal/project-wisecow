@@ -29,7 +29,6 @@ jobs:
         push: true
         tags: aryankaushal7/wisecow:latest
 
-    
     - name: Create Kind cluster
       uses: helm/kind-action@v1.9.0
       with:
@@ -38,8 +37,27 @@ jobs:
     - name: Verify cluster
       run: kubectl cluster-info
 
-    - name: Deploy Wisecow manifests
+  
+    - name: Create TLS secret in Kind
+      run: |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: wisecow-tls
+        type: kubernetes.io/tls
+        data:
+          tls.crt: ${{ secrets.TLS_CRT }}
+          tls.key: ${{ secrets.TLS_KEY }}
+        EOF
+
+    
+    - name: Deploy Wisecow Deployment & Service
       run: |
         kubectl apply -f wisecow-deployment.yaml
         kubectl apply -f wisecow-service.yaml
         kubectl rollout status deployment/wisecow
+    - name: Deploy Wisecow Ingress
+      run: |
+        kubectl apply -f wisecow-ingress.yaml
+
