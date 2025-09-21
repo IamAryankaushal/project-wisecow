@@ -1,0 +1,35 @@
+apiVersion: security.kubearmor.com/v1
+kind: KubeArmorPolicy
+metadata:
+  name: wisecow-zero-trust
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: wisecow
+
+  # =======================
+  # PROCESS RULES
+  # =======================
+  process:
+    allow:
+      - path: /bin/sh
+      - path: /usr/games/cowsay
+
+  # =======================
+  # FILE RULES
+  # =======================
+  file:
+    allow:
+      - path: /etc/hosts
+      - path: /etc/resolv.conf
+      - path: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  # =======================
+  # NETWORK RULES
+  # =======================
+  network:
+    allow:
+      - protocol: TCP
+        port: 4499
+
